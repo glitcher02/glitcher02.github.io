@@ -28,7 +28,7 @@
     header.top p{max-width:62ch;margin:0;}
 
     .layout{max-width:1080px;margin:0 auto;padding:28px clamp(20px,5vw,48px) 40px;display:grid;grid-template-columns:360px 1fr;gap:36px;align-items:start;}
-    @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;} .form{position:static;}}
 
     .form{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 24px;position:sticky;top:20px;}
     .field{margin-bottom:18px;}
@@ -64,6 +64,28 @@
     .disc{max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 60px;font-size:13px;color:var(--stone);}
     .disc a{color:var(--gold-d);}
     .disc b{color:var(--ink-2);}
+    /* at-a-glance + actions + refine + loading */
+    .out-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+    .out-actions{display:flex;gap:8px;flex-shrink:0;}
+    .out-actions button{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:30px;padding:7px 13px;cursor:pointer;}
+    .out-actions button:hover{border-color:var(--gold);color:var(--gold-d);}
+    .glance{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 22px;}
+    .glance span{font-size:12px;color:var(--gold-d);background:var(--cream);border:1px solid var(--line);border-radius:30px;padding:5px 12px;}
+    .refine{margin-top:26px;padding-top:20px;border-top:1px dashed var(--line);}
+    .refine .rl{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);margin-bottom:10px;}
+    .refine .rbtns{display:flex;flex-wrap:wrap;gap:8px;}
+    .refine button{font-family:var(--sans);font-size:13px;color:var(--pine);background:#eef4f2;border:1px solid #dce9e6;border-radius:30px;padding:8px 14px;cursor:pointer;}
+    .refine button:hover{background:var(--pine);color:#fff;border-color:var(--pine);}
+    .refine button:disabled{opacity:.5;cursor:default;}
+    .skeleton .sk{height:14px;border-radius:6px;background:linear-gradient(90deg,#efe9df 25%,#f7f3ec 37%,#efe9df 63%);background-size:400% 100%;animation:sh 1.3s ease infinite;margin:0 0 14px;}
+    @keyframes sh{0%{background-position:100% 0}100%{background-position:0 0}}
+    /* on mobile the form must NOT stick, or it covers the output as you scroll */
+    @media(max-width:900px){ .form{position:static;top:auto;} }
+    @media print{
+      .ribbon,header.top,.form,.disc,.out-actions,.refine{display:none !important;}
+      body{background:#fff;} .layout{display:block;padding:0;max-width:none;}
+      .out{box-shadow:none;border:0;min-height:0;padding:0;}
+    }
   </style>
 </head>
 <body>
@@ -205,12 +227,46 @@
       for(let i=0;i<text.length;i++){ el.textContent = text.slice(0,i+1); await new Promise(r=>setTimeout(r, speed)); }
       el.classList.remove('cursor');
     }
-    async function render(p){
+    const STYLE_LABELS = {relaxed:'Relaxed',active:'Active',food:'Food & wine',culture:'Culture',wildlife:'Wildlife'};
+    const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+    function glanceHTML(inp){
+      const chips = [inp.destination, inp.nights + ' nights', inp.party]
+        .concat((inp.styles||[]).map(s => STYLE_LABELS[s] || s));
+      return chips.map(c => `<span>${esc(c)}</span>`).join('');
+    }
+    function proposalText(p){
+      let t = p.title + '\n' + p.subtitle + '\n\n';
+      if(p.intro && p.intro.trim()) t += p.intro + '\n\n';
+      p.days.forEach((d,i) => t += `Day ${i+1} — ${d.title}\n${d.body}\n\n`);
+      return t.trim();
+    }
+    function copyText(t){
+      if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(t); return; }
+      const ta = document.createElement('textarea'); ta.value = t;
+      ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta);
+      ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta);
+    }
+    function skeleton(){
+      document.getElementById('out').innerHTML =
+        '<p class="label eyebrow">Drafting…</p><div class="skeleton" style="margin-top:14px">'
+        + '<div class="sk" style="width:70%;height:26px"></div><div class="sk" style="width:45%"></div>'
+        + '<div class="sk" style="width:100%;margin-top:24px"></div><div class="sk" style="width:92%"></div>'
+        + '<div class="sk" style="width:96%"></div><div class="sk" style="width:60%"></div></div>';
+    }
+
+    async function render(p, inp){
       const out = document.getElementById('out');
-      out.innerHTML = `<p class="label eyebrow">Draft proposal</p><h2 id="t"></h2><p class="sub" id="s"></p><p class="intro" id="intro"></p><div id="days"></div>`;
+      out.innerHTML =
+        '<div class="out-head"><p class="label eyebrow">Draft proposal</p>'
+        + '<div class="out-actions"><button id="copyBtn" type="button">Copy</button>'
+        + '<button id="printBtn" type="button">Print / PDF</button></div></div>'
+        + '<h2 id="t"></h2><p class="sub" id="s"></p>'
+        + `<div class="glance">${glanceHTML(inp)}</div>`
+        + '<p class="intro" id="intro"></p><div id="days"></div>';
       await typeInto(document.getElementById('t'), p.title, 14);
       await typeInto(document.getElementById('s'), p.subtitle, 8);
-      if (p.intro && p.intro.trim()) await typeInto(document.getElementById('intro'), p.intro, 5);
+      if(p.intro && p.intro.trim()) await typeInto(document.getElementById('intro'), p.intro, 5);
       else document.getElementById('intro').style.display = 'none';
       const daysEl = document.getElementById('days');
       for(let n=0;n<p.days.length;n++){
@@ -221,35 +277,58 @@
         await typeInto(block.querySelector('h4'), p.days[n].title, 12);
         await typeInto(block.querySelector('p'), p.days[n].body, 4);
       }
+      // refine controls
+      const refine = document.createElement('div'); refine.className = 'refine';
+      refine.innerHTML = '<div class="rl">Refine ✦</div><div class="rbtns">'
+        + '<button data-r="Add more detail and specific experiences to each day">More detail</button>'
+        + '<button data-r="Make each day more concise — one crisp sentence">More concise</button>'
+        + '<button data-r="Make it more adventurous and active">More adventurous</button>'
+        + '<button data-r="Make it slower and more relaxing">More relaxed</button></div>';
+      out.appendChild(refine);
+      document.getElementById('copyBtn').onclick = () => {
+        copyText(proposalText(p));
+        const b = document.getElementById('copyBtn'); b.textContent = 'Copied ✓';
+        setTimeout(() => b.textContent = 'Copy', 1600);
+      };
+      document.getElementById('printBtn').onclick = () => window.print();
+      refine.querySelectorAll('button').forEach(b => b.onclick = () => generate(b.dataset.r));
     }
 
     const go = document.getElementById('go');
-    go.addEventListener('click', async () => {
+
+    async function generate(refine){
       const destination = document.getElementById('dest').value.trim();
       if(!destination){ document.getElementById('dest').focus(); return; }
-      const nights = parseInt(document.getElementById('nights').value,10);
-      const party = document.getElementById('party').value;
-      const styles = [...document.querySelectorAll('.chip.on')].map(c=>c.dataset.k);
-
-      go.disabled = true; go.textContent = usingAI ? 'Drafting with AI…' : 'Drafting…';
+      const inputs = {
+        destination,
+        nights: parseInt(document.getElementById('nights').value,10),
+        party: document.getElementById('party').value,
+        styles: [...document.querySelectorAll('.chip.on')].map(c => c.dataset.k),
+      };
+      document.querySelectorAll('.refine button').forEach(b => b.disabled = true);
+      go.disabled = true;
+      go.textContent = usingAI ? (refine ? 'Refining…' : 'Drafting with AI…') : (refine ? 'Refining…' : 'Drafting…');
+      skeleton();
       try{
         let proposal;
         if(usingAI){
-          try { proposal = await aiProposal({ destination, nights, party, styles }); }
-          catch(err){ proposal = localProposal(destination, nights, party, styles); proposal._note = String(err.message||err); }
+          try { proposal = await aiProposal({ ...inputs, refine: refine || '' }); }
+          catch(err){ proposal = localProposal(inputs.destination, inputs.nights, inputs.party, inputs.styles); proposal._note = String(err.message||err); }
         } else {
-          proposal = localProposal(destination, nights, party, styles);
+          proposal = localProposal(inputs.destination, inputs.nights, inputs.party, inputs.styles);
         }
-        await render(proposal);
+        await render(proposal, inputs);
         if(proposal._note){
-          const e = document.createElement('p'); e.className='err';
-          e.textContent = 'Live AI unavailable ('+proposal._note+') — showing the built-in draft instead.';
+          const e = document.createElement('p'); e.className = 'err';
+          e.textContent = 'Live AI unavailable (' + proposal._note + ') — showing the built-in draft instead.';
           document.getElementById('out').appendChild(e);
         }
       } finally {
         go.disabled = false; go.textContent = '✦ Draft it again';
       }
-    });
+    }
+
+    go.addEventListener('click', () => generate());
   </script>
 </body>
 </html>

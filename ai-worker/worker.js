@@ -106,6 +106,7 @@ export default {
     const styles = Array.isArray(body.styles)
       ? body.styles.map((s) => String(s).slice(0, 20)).slice(0, 6)
       : [];
+    const refine = String(body.refine || "").trim().slice(0, 120); // optional revision instruction
 
     if (!destination) return json({ error: "Please enter a destination." }, 400, origin);
 
@@ -127,7 +128,8 @@ export default {
       `Style & interests: ${styles.length ? styles.join(", ") : "unhurried, relaxed"}\n\n` +
       `Write a ${nights}-day outline (roughly one entry per night, starting with arrival and ending ` +
       `with a farewell). Give it a title, a short evocative subtitle, and a one-sentence introduction ` +
-      `(1–2 sentences) in the 'intro' field.`;
+      `(1–2 sentences) in the 'intro' field.` +
+      (refine ? `\n\nRevision note: ${refine}. Keep the same destination, number of nights and party.` : "");
 
     try {
       const resp = await fetch("https://api.openai.com/v1/chat/completions", {
