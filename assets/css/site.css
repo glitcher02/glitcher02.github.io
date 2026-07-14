@@ -109,7 +109,10 @@ h1, h2, h3, h4 { font-family: var(--serif); color: var(--ink); font-weight: 400;
 /* ---------- hero ---------- */
 .hero {
   position: relative;
-  background: var(--olive);
+  background:
+    linear-gradient(115deg, rgba(9, 20, 15, 0.90) 0%, rgba(9, 20, 15, 0.66) 60%, rgba(9, 20, 15, 0.5) 100%),
+    url("/assets/img/viaduct.jpg") center 35% / cover no-repeat,
+    var(--olive);
   color: var(--cream);
   overflow: hidden;
 }

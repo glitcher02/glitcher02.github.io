@@ -18,7 +18,7 @@
 // any local dev server (any port), and a GitHub Pages preview URL.
 function isAllowedOrigin(origin) {
   if (!origin) return false;
-  if (origin === "https://archiebutler.co.uk" || origin === "https://www.archiebutler.co.uk") return true;
+  if (/^https?:\/\/(www\.)?archiebutler\.co\.uk$/i.test(origin)) return true;   // live site (http while cert provisions, https after)
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true; // local dev, any port
   if (/^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin)) return true;          // GitHub Pages preview
   return false;
