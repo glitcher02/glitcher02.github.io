@@ -5,61 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <title>Quote &amp; Margin Builder — Demo · Archie Butler</title>
-  <meta name="description" content="An interactive quoting demo — add experiences to a trip and watch price, cost and margin update live. Sample data only." />
+  <meta name="description" content="An interactive luxury-travel quoting tool — per-line markup or commission, hotel & agent commission, multi-currency, live margins. Sample data only." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root{
       --ink:#1f1b17;--ink-2:#4a433b;--gold:#c3a26b;--gold-d:#a5854f;--stone:#b9b0a1;
-      --pine:#16302b;--cream:#faf6ef;--cream-2:#f2ece1;--line:#e6ddce;--green:#4f7d5f;
+      --pine:#16302b;--green:#4f7d5f;--cream:#faf6ef;--cream-2:#f2ece1;--line:#e6ddce;
       --serif:"Fraunces","Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,sans-serif;
     }
     *,*::before,*::after{box-sizing:border-box;}
-    body{margin:0;font-family:var(--sans);color:var(--ink-2);background:var(--cream);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
-    h1,h2,h3,h4{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.1;}
-    .label{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-d);}
+    body{margin:0;font-family:var(--sans);color:var(--ink-2);background:var(--cream);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+    h1,h2,h3,h4{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.12;}
+    .label{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-d);}
     .ribbon{background:var(--ink);color:var(--cream);font-size:13px;text-align:center;padding:9px 16px;}
     .ribbon a{color:var(--gold);font-weight:600;text-decoration:none;}
     .ribbon a:hover{text-decoration:underline;}
-    header.top{max-width:1120px;margin:0 auto;padding:40px clamp(20px,5vw,48px) 8px;}
-    header.top h1{font-size:clamp(30px,5vw,44px);margin:14px 0 8px;}
-    header.top p{max-width:60ch;margin:0;}
+    header.top{max-width:1180px;margin:0 auto;padding:36px clamp(20px,5vw,48px) 6px;}
+    header.top h1{font-size:clamp(28px,5vw,42px);margin:12px 0 8px;}
+    header.top p{max-width:64ch;margin:0;font-size:15.5px;}
 
-    .layout{max-width:1120px;margin:0 auto;padding:28px clamp(20px,5vw,48px) 80px;display:grid;grid-template-columns:1fr 340px;gap:36px;align-items:start;}
-    @media(max-width:880px){.layout{grid-template-columns:1fr;}}
+    .layout{max-width:1180px;margin:0 auto;padding:22px clamp(20px,5vw,48px) 70px;display:grid;grid-template-columns:1fr 330px;gap:32px;align-items:start;}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;}}
 
-    .cat{margin-bottom:30px;}
-    .cat > .label{display:block;margin-bottom:12px;}
-    .item{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
-    .item.on{border-color:var(--gold);box-shadow:0 8px 24px -18px rgba(31,27,23,.5);}
-    .item h4{font-size:18px;margin-bottom:3px;}
-    .item p{margin:0;font-size:13.5px;color:#6b5f52;}
-    .item .price{font-family:var(--serif);font-size:17px;color:var(--ink);white-space:nowrap;}
-    .item .price small{font-family:var(--sans);font-size:11px;color:var(--stone);display:block;text-align:right;letter-spacing:.04em;}
-    .stepper{display:flex;align-items:center;gap:0;margin-top:10px;border:1px solid var(--line);border-radius:30px;overflow:hidden;width:fit-content;}
-    .stepper button{width:34px;height:32px;border:0;background:var(--cream-2);color:var(--ink);font-size:18px;cursor:pointer;line-height:1;}
+    /* controls */
+    .controls{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px 22px;}
+    .ctl label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin-bottom:7px;}
+    .ctl .v{font-family:var(--serif);font-size:15px;color:var(--gold-d);font-weight:500;}
+    input[type=range]{width:100%;accent-color:var(--gold-d);}
+    .num{width:100%;font-family:var(--sans);font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--cream);color:var(--ink);}
+    .num:focus,select:focus,input:focus{outline:none;border-color:var(--gold);}
+    .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:30px;overflow:hidden;width:fit-content;}
+    .stepper button{width:30px;height:30px;border:0;background:var(--cream-2);color:var(--ink);font-size:16px;cursor:pointer;}
     .stepper button:hover{background:var(--gold);color:#fff;}
-    .stepper .qty{min-width:42px;text-align:center;font-weight:600;font-size:14px;}
-    .ctrls{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);margin-top:14px;padding-top:12px;}
-    .ctrls .unit{font-size:12px;color:var(--stone);}
+    .stepper .q{min-width:34px;text-align:center;font-weight:600;font-size:14px;}
+    .fxbar{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;border-top:1px dashed var(--line);padding-top:14px;}
+    .fxbar .fxlab{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);}
+    .fx{display:flex;align-items:center;gap:6px;font-size:13px;}
+    .fx input{width:64px;font-family:var(--sans);font-size:13px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--cream);}
+    .fx b{color:var(--ink);font-weight:600;}
+
+    /* sheet + line cards */
+    .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .add{font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;background:var(--pine);border:0;border-radius:30px;padding:9px 16px;cursor:pointer;}
+    .add:hover{background:#12261f;}
+    .line{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 14px 12px;margin-bottom:10px;position:relative;border-left:4px solid var(--stone);}
+    .line[data-type=markup]{border-left-color:var(--gold);}
+    .line[data-type=commission]{border-left-color:var(--green);}
+    .line .r1{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;}
+    .f{display:flex;flex-direction:column;gap:4px;}
+    .f .fl{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--stone);}
+    .f input,.f select{font-family:var(--sans);font-size:14px;padding:8px 9px;border:1px solid var(--line);border-radius:7px;background:var(--cream);color:var(--ink);}
+    .f.name{flex:1 1 180px;}
+    .f.name input{width:100%;}
+    .f.amt input{width:96px;text-align:right;}
+    .f.qty input{width:56px;text-align:right;}
+    .f.pct input{width:66px;text-align:right;}
+    .f.type select,.f.ccy select{padding-right:6px;}
+    .line .res{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .line .res b{color:var(--ink);font-weight:600;}
+    .line .res .prof{color:var(--green);font-weight:600;}
+    .rm{position:absolute;top:10px;right:10px;width:24px;height:24px;border:1px solid var(--line);background:var(--cream);border-radius:50%;color:var(--stone);cursor:pointer;font-size:14px;line-height:1;}
+    .rm:hover{border-color:#c0603f;color:#c0603f;}
+    .hint{font-size:12px;color:var(--stone);margin:2px 0 0;}
 
     /* summary */
-    .summary{position:sticky;top:20px;background:var(--pine);color:var(--cream);border-radius:12px;padding:28px 26px;box-shadow:0 30px 60px -30px rgba(22,48,43,.7);}
+    .summary{position:sticky;top:18px;background:var(--pine);color:var(--cream);border-radius:14px;padding:24px 24px 26px;box-shadow:0 30px 60px -30px rgba(22,48,43,.7);}
     .summary .label{color:var(--gold);}
-    .summary h3{color:var(--cream);font-size:22px;margin:6px 0 22px;}
-    .sumrow{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid rgba(250,246,239,.12);font-size:14px;}
-    .sumrow span:first-child{color:rgba(250,246,239,.72);}
-    .sumrow .v{font-family:var(--serif);font-size:19px;}
-    .total .v{font-size:32px;color:var(--gold);}
-    .total{border-bottom:0;padding-top:16px;}
-    .pp{font-size:12px;color:rgba(250,246,239,.6);text-align:right;margin:2px 0 0;}
-    .bar{height:8px;border-radius:6px;background:rgba(250,246,239,.14);overflow:hidden;margin:6px 0 4px;}
-    .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#e0c48f);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1);}
-    .marginval{font-family:var(--serif);font-size:26px;color:#bfe0c4;}
-    .empty{opacity:.6;font-size:13px;font-style:italic;font-family:var(--serif);}
-    .note{max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 60px;font-size:13px;color:var(--stone);}
+    .summary h3{color:var(--cream);font-size:20px;margin:6px 0 18px;}
+    .srow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;font-size:13.5px;border-bottom:1px solid rgba(250,246,239,.12);}
+    .srow span:first-child{color:rgba(250,246,239,.72);}
+    .srow .v{font-family:var(--serif);font-size:17px;}
+    .srow.sub{padding:3px 0;border-bottom:0;font-size:12px;}
+    .srow.sub span:first-child{color:rgba(250,246,239,.5);padding-left:12px;}
+    .srow.sub .v{font-size:13px;color:rgba(250,246,239,.75);}
+    .srow.out .v{color:#e6b8a2;}
+    .srow.net{border-bottom:0;padding-top:14px;margin-top:4px;border-top:1px solid rgba(250,246,239,.25);}
+    .srow.net .v{font-size:30px;color:var(--gold);}
+    .marg{display:flex;gap:10px;margin-top:14px;}
+    .marg .m{flex:1;background:rgba(250,246,239,.06);border:1px solid rgba(250,246,239,.14);border-radius:8px;padding:12px 14px;}
+    .marg .m .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(250,246,239,.6);}
+    .marg .m .n{font-family:var(--serif);font-size:22px;margin-top:4px;}
+    .marg .m.gross .n{color:#bfe0c4;}
+    .marg .m.netm .n{color:var(--gold);}
+    .pp{font-size:12px;color:rgba(250,246,239,.6);text-align:right;margin-top:12px;}
+
+    .note{max-width:1180px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 60px;font-size:13px;color:var(--stone);}
     .note a{color:var(--gold-d);}
+    @media(max-width:900px){.summary{position:static;margin-top:18px;}}
   </style>
 </head>
 <body>
@@ -68,100 +102,206 @@
   <header class="top">
     <span class="label">Sales &amp; margins</span>
     <h1>Quote &amp; margin builder</h1>
-    <p>Build a trip the way a consultant would — add and adjust experiences, and watch the client price, your cost and the margin recalculate live. This is the maths no one should be doing by hand in a spreadsheet.</p>
+    <p>A working quote sheet: mark up ground services or take commission on hotels, set margins globally or per line, track the commission the hotel pays you and the cut you pay a selling agent — all in multiple currencies, with the true margin updating live.</p>
   </header>
 
   <div class="layout">
-    <div id="catalogue">
-      <!-- categories injected by JS -->
+    <div>
+      <!-- global controls -->
+      <div class="controls">
+        <div class="ctl">
+          <label>Global margin · <span class="v" id="mVal">25%</span></label>
+          <input type="range" id="mRange" min="0" max="45" step="1" value="25" />
+        </div>
+        <div class="ctl">
+          <label>Hotel commission (in)</label>
+          <input class="num" id="hotelC" type="number" min="0" max="40" step="0.5" value="12" />
+        </div>
+        <div class="ctl">
+          <label>Agent / IC commission (out)</label>
+          <input class="num" id="agentC" type="number" min="0" max="100" step="1" value="20" />
+        </div>
+        <div class="ctl">
+          <label>Guests</label>
+          <div class="stepper"><button type="button" id="gDown">–</button><span class="q" id="gVal">2</span><button type="button" id="gUp">+</button></div>
+        </div>
+        <div class="fxbar">
+          <span class="fxlab">FX → £ (per 1 unit)</span>
+          <span class="fx"><b>€</b><input id="fxEUR" type="number" step="0.01" value="0.85" /></span>
+          <span class="fx"><b>$</b><input id="fxUSD" type="number" step="0.01" value="0.79" /></span>
+          <span class="fx"><b>ZAR</b><input id="fxZAR" type="number" step="0.001" value="0.042" /></span>
+        </div>
+      </div>
+
+      <div class="sheet-head">
+        <span class="label">Quote lines</span>
+        <button class="add" id="addLine" type="button">+ Add line</button>
+      </div>
+      <p class="hint">Markup lines: enter your <b>net cost</b> and a margin. Commission lines: enter the <b>client rate</b> — you earn the hotel-commission % on it.</p>
+      <div id="sheet"></div>
     </div>
 
     <aside class="summary">
       <span class="label">Live quote</span>
       <h3>Highlands &amp; Islands</h3>
-      <div id="empty" class="empty">Add a few experiences to see the numbers build…</div>
-      <div id="figures" style="display:none">
-        <div class="sumrow"><span>Client price</span><span class="v" id="sell">£0</span></div>
-        <div class="sumrow"><span>Your cost</span><span class="v" id="cost">£0</span></div>
-        <div class="sumrow" style="border-bottom:0;padding-bottom:2px"><span>Margin</span><span class="marginval" id="marginpct">0%</span></div>
-        <div class="bar"><i id="marginbar"></i></div>
-        <div class="sumrow total"><span>Profit</span><span class="v" id="profit">£0</span></div>
-        <p class="pp" id="perperson">for 2 guests</p>
+      <div class="srow"><span>Client price</span><span class="v" id="sSell">£0</span></div>
+      <div class="srow"><span>Cost to suppliers</span><span class="v" id="sCost">£0</span></div>
+      <div class="srow"><span>Gross profit</span><span class="v" id="sGross">£0</span></div>
+      <div class="srow sub"><span>· from markup</span><span class="v" id="sMarkup">£0</span></div>
+      <div class="srow sub"><span>· from commission</span><span class="v" id="sComm">£0</span></div>
+      <div class="srow out"><span>Agent / IC payout <span id="sAgentPct" style="opacity:.6"></span></span><span class="v" id="sAgent">−£0</span></div>
+      <div class="srow net"><span>Net profit</span><span class="v" id="sNet">£0</span></div>
+      <div class="marg">
+        <div class="m gross"><div class="k">Gross margin</div><div class="n" id="sGM">0%</div></div>
+        <div class="m netm"><div class="k">Net margin</div><div class="n" id="sNM">0%</div></div>
       </div>
+      <p class="pp" id="sPP">£0 per guest · 2 guests</p>
     </aside>
   </div>
 
-  <p class="note">Prices, costs and margins are invented for the demo. In a real build this sits on your live product catalogue and supplier costs, so quotes stay accurate automatically. <a href="/#demos">See the other demos →</a></p>
+  <p class="note">All figures are invented for the demo. In a real build this runs on your live supplier costs, contracted commission levels and FX feed, so every quote is accurate and every consultant works to the same margins. <a href="/#demos">See the other demos →</a></p>
 
   <script>
-    const CATALOGUE = [
-      { cat:'Accommodation', unit:'per night', items:[
-        { id:'a1', name:'Country house on the loch', desc:'Family-run retreat, Torridon', sell:620, cost:430, qty:2 },
-        { id:'a2', name:'Island hotel, Skye', desc:'Sea-view suite, half board', sell:540, cost:380, qty:0 },
-      ]},
-      { cat:'Private guiding & transfers', unit:'per day', items:[
-        { id:'g1', name:'Dedicated driver-guide', desc:'Private vehicle throughout', sell:480, cost:300, qty:0 },
-        { id:'g2', name:'Mountain-walking guide', desc:'Qualified private guide', sell:390, cost:250, qty:0 },
-      ]},
-      { cat:'Experiences', unit:'per booking', items:[
-        { id:'e1', name:'Private boat charter', desc:'Wildlife & sea lochs, Skye', sell:950, cost:640, qty:0 },
-        { id:'e2', name:'Whisky tasting by the fire', desc:'West-coast malts, private', sell:220, cost:120, qty:0 },
-        { id:'e3', name:'Castle visit before opening', desc:'Private access', sell:180, cost:90, qty:0 },
-      ]},
-      { cat:'Dining', unit:'per cover', items:[
-        { id:'d1', name:'Tasting menu at the house', desc:'Garden & day-boat produce', sell:145, cost:85, qty:2 },
-        { id:'d2', name:"Celebrated island restaurant", desc:'Farewell dinner', sell:210, cost:130, qty:0 },
-      ]},
-    ];
-    const GUESTS = 2;
-    const fmt = n => '£' + Math.round(n).toLocaleString('en-GB');
+    // ── state ─────────────────────────────────────────────────────────
+    const state = {
+      globalMargin: 25,   // % of sell, for markup lines
+      hotelComm: 12,      // % the hotel/supplier pays us, for commission lines
+      agentPct: 20,       // % of gross profit paid out to a selling agent / IC
+      guests: 2,
+      fx: { GBP: 1, EUR: 0.85, USD: 0.79, ZAR: 0.042 },
+      lines: [
+        { id: 1, name: 'Country house, Torridon', type: 'markup',     ccy: 'GBP', amount: 430,  qty: 2, margin: null },
+        { id: 2, name: 'Island hotel, Skye',       type: 'commission', ccy: 'GBP', amount: 620,  qty: 3, margin: null },
+        { id: 3, name: 'Dedicated driver-guide',   type: 'markup',     ccy: 'GBP', amount: 300,  qty: 6, margin: null },
+        { id: 4, name: 'Private boat charter',     type: 'markup',     ccy: 'GBP', amount: 640,  qty: 1, margin: 30 },
+        { id: 5, name: 'Helicopter transfer',      type: 'markup',     ccy: 'EUR', amount: 2500, qty: 1, margin: null },
+        { id: 6, name: 'Farewell tasting menu',    type: 'commission', ccy: 'GBP', amount: 210,  qty: 2, margin: null },
+      ],
+    };
+    let nextId = 7;
+    const CCYS = ['GBP', 'EUR', 'USD', 'ZAR'];
+    const SYM = { GBP: '£', EUR: '€', USD: '$', ZAR: 'R' };
+    const gbp = n => '£' + Math.round(n).toLocaleString('en-GB');
 
-    const cat = document.getElementById('catalogue');
-    CATALOGUE.forEach(group => {
-      const sec = document.createElement('div'); sec.className = 'cat';
-      sec.innerHTML = `<span class="label">${group.cat}</span>`;
-      group.items.forEach(it => {
-        const row = document.createElement('div'); row.className = 'item' + (it.qty>0?' on':''); row.dataset.id = it.id;
-        row.innerHTML = `
-          <div>
-            <h4>${it.name}</h4>
-            <p>${it.desc}</p>
-          </div>
-          <div class="price">${fmt(it.sell)}<small>${group.unit}</small></div>
-          <div class="ctrls">
-            <span class="unit">${group.unit}</span>
-            <div class="stepper">
-              <button aria-label="less" data-d="-1">–</button>
-              <span class="qty">${it.qty}</span>
-              <button aria-label="more" data-d="1">+</button>
-            </div>
-          </div>`;
-        row.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-          it.qty = Math.max(0, it.qty + parseInt(b.dataset.d,10));
-          row.querySelector('.qty').textContent = it.qty;
-          row.classList.toggle('on', it.qty>0);
-          recalc();
-        }));
-        sec.appendChild(row);
+    // ── maths ─────────────────────────────────────────────────────────
+    function computeLine(l){
+      const rate = state.fx[l.ccy] || 1;
+      const unit = (parseFloat(l.amount) || 0) * rate;      // per-unit in £
+      const qty = Math.max(0, parseFloat(l.qty) || 0);
+      if(l.type === 'commission'){
+        const sell = unit * qty;                             // client rate
+        const comm = sell * (state.hotelComm / 100);         // we earn this
+        return { sell, cost: sell - comm, markup: 0, comm, gross: comm };
+      }
+      const cost = unit * qty;                               // our net cost
+      let m = (l.margin === null || l.margin === '' ? state.globalMargin : parseFloat(l.margin)) || 0;
+      m = Math.max(0, Math.min(95, m));
+      const sell = cost / (1 - m / 100);                     // margin = profit / sell
+      return { sell, cost, markup: sell - cost, comm: 0, gross: sell - cost };
+    }
+    function totals(){
+      let sell = 0, cost = 0, markup = 0, comm = 0;
+      state.lines.forEach(l => { const c = computeLine(l); sell += c.sell; cost += c.cost; markup += c.markup; comm += c.comm; });
+      const gross = markup + comm;
+      const agent = gross * (state.agentPct / 100);
+      const net = gross - agent;
+      return { sell, cost, markup, comm, gross, agent, net,
+        gm: sell ? gross / sell * 100 : 0, nm: sell ? net / sell * 100 : 0,
+        pp: state.guests ? sell / state.guests : sell };
+    }
+
+    // ── render ────────────────────────────────────────────────────────
+    function opt(list, sel){ return list.map(v => `<option${v===sel?' selected':''}>${v}</option>`).join(''); }
+    function lineCard(l){
+      const isC = l.type === 'commission';
+      const pctField = isC
+        ? `<div class="f pct"><span class="fl">Comm %</span><input class="num" value="${state.hotelComm}" disabled title="Set by Hotel commission above" /></div>`
+        : `<div class="f pct"><span class="fl">Margin %</span><input data-f="margin" type="number" min="0" max="95" step="1" placeholder="${state.globalMargin}" value="${l.margin===null?'':l.margin}" /></div>`;
+      return `<div class="line" data-id="${l.id}" data-type="${l.type}">
+        <button class="rm" data-remove title="Remove line">×</button>
+        <div class="r1">
+          <div class="f name"><span class="fl">Item</span><input data-f="name" value="${(l.name||'').replace(/"/g,'&quot;')}" /></div>
+          <div class="f type"><span class="fl">Type</span><select data-f="type"><option value="markup"${!isC?' selected':''}>Markup</option><option value="commission"${isC?' selected':''}>Commission</option></select></div>
+          <div class="f amt"><span class="fl">${isC?'Client rate':'Net cost'}</span><input data-f="amount" type="number" min="0" step="1" value="${l.amount}" /></div>
+          <div class="f ccy"><span class="fl">Ccy</span><select data-f="ccy">${opt(CCYS, l.ccy)}</select></div>
+          <div class="f qty"><span class="fl">Qty</span><input data-f="qty" type="number" min="0" step="1" value="${l.qty}" /></div>
+          ${pctField}
+        </div>
+        <div class="res" id="res-${l.id}"></div>
+      </div>`;
+    }
+    function renderLines(){
+      document.getElementById('sheet').innerHTML = state.lines.map(lineCard).join('');
+      recompute();
+    }
+    function recompute(){
+      state.lines.forEach(l => {
+        const c = computeLine(l);
+        const el = document.getElementById('res-' + l.id);
+        if(el) el.innerHTML = l.type === 'commission'
+          ? `<span>Client pays <b>${gbp(c.sell)}</b></span><span>commission <span class="prof">${gbp(c.comm)}</span></span>`
+          : `<span>Sell <b>${gbp(c.sell)}</b> · cost ${gbp(c.cost)}</span><span>profit <span class="prof">${gbp(c.markup)}</span></span>`;
       });
-      cat.appendChild(sec);
+      const t = totals();
+      document.getElementById('sSell').textContent = gbp(t.sell);
+      document.getElementById('sCost').textContent = gbp(t.cost);
+      document.getElementById('sGross').textContent = gbp(t.gross);
+      document.getElementById('sMarkup').textContent = gbp(t.markup);
+      document.getElementById('sComm').textContent = gbp(t.comm);
+      document.getElementById('sAgent').textContent = '−' + gbp(t.agent);
+      document.getElementById('sAgentPct').textContent = '(' + state.agentPct + '%)';
+      document.getElementById('sNet').textContent = gbp(t.net);
+      document.getElementById('sGM').textContent = t.gm.toFixed(1) + '%';
+      document.getElementById('sNM').textContent = t.nm.toFixed(1) + '%';
+      document.getElementById('sPP').textContent = gbp(t.pp) + ' per guest · ' + state.guests + ' guest' + (state.guests===1?'':'s');
+    }
+
+    // ── events ────────────────────────────────────────────────────────
+    const sheet = document.getElementById('sheet');
+    function lineById(id){ return state.lines.find(l => l.id === +id); }
+    sheet.addEventListener('input', e => {
+      const f = e.target.dataset.f; if(!f) return;
+      const l = lineById(e.target.closest('.line').dataset.id); if(!l) return;
+      if(f === 'name') l.name = e.target.value;
+      else if(f === 'margin') l.margin = e.target.value === '' ? null : parseFloat(e.target.value);
+      else if(f === 'amount' || f === 'qty') l[f] = e.target.value;
+      recompute();
+    });
+    sheet.addEventListener('change', e => {
+      const f = e.target.dataset.f; if(!f) return;
+      const l = lineById(e.target.closest('.line').dataset.id); if(!l) return;
+      if(f === 'type'){ l.type = e.target.value; renderLines(); }
+      else if(f === 'ccy'){ l.ccy = e.target.value; recompute(); }
+    });
+    sheet.addEventListener('click', e => {
+      if(e.target.hasAttribute('data-remove')){
+        const id = +e.target.closest('.line').dataset.id;
+        state.lines = state.lines.filter(l => l.id !== id);
+        renderLines();
+      }
+    });
+    document.getElementById('addLine').addEventListener('click', () => {
+      state.lines.push({ id: nextId++, name: 'New item', type: 'markup', ccy: 'GBP', amount: 0, qty: 1, margin: null });
+      renderLines();
+      sheet.lastElementChild.querySelector('[data-f=name]').select();
     });
 
-    function recalc(){
-      let sell=0, cost=0, any=false;
-      CATALOGUE.forEach(g => g.items.forEach(it => { if(it.qty>0) any=true; sell += it.sell*it.qty; cost += it.cost*it.qty; }));
-      document.getElementById('empty').style.display = any ? 'none':'block';
-      document.getElementById('figures').style.display = any ? 'block':'none';
-      const profit = sell - cost;
-      const margin = sell>0 ? (profit/sell*100) : 0;
-      document.getElementById('sell').textContent = fmt(sell);
-      document.getElementById('cost').textContent = fmt(cost);
-      document.getElementById('profit').textContent = fmt(profit);
-      document.getElementById('marginpct').textContent = margin.toFixed(0) + '%';
-      document.getElementById('marginbar').style.width = Math.min(100, margin) + '%';
-      document.getElementById('perperson').textContent = fmt(sell/GUESTS) + ' per guest · ' + GUESTS + ' guests';
-    }
-    recalc();
+    const mRange = document.getElementById('mRange');
+    mRange.addEventListener('input', () => { state.globalMargin = +mRange.value; document.getElementById('mVal').textContent = mRange.value + '%'; recompute(); });
+    document.getElementById('hotelC').addEventListener('input', e => {
+      state.hotelComm = parseFloat(e.target.value) || 0;
+      // update disabled comm fields shown on commission lines
+      document.querySelectorAll('.line[data-type=commission] .pct input').forEach(i => i.value = state.hotelComm);
+      recompute();
+    });
+    document.getElementById('agentC').addEventListener('input', e => { state.agentPct = parseFloat(e.target.value) || 0; recompute(); });
+    document.getElementById('gUp').addEventListener('click', () => { state.guests++; document.getElementById('gVal').textContent = state.guests; recompute(); });
+    document.getElementById('gDown').addEventListener('click', () => { state.guests = Math.max(1, state.guests - 1); document.getElementById('gVal').textContent = state.guests; recompute(); });
+    document.getElementById('fxEUR').addEventListener('input', e => { state.fx.EUR = parseFloat(e.target.value) || 0; recompute(); });
+    document.getElementById('fxUSD').addEventListener('input', e => { state.fx.USD = parseFloat(e.target.value) || 0; recompute(); });
+    document.getElementById('fxZAR').addEventListener('input', e => { state.fx.ZAR = parseFloat(e.target.value) || 0; recompute(); });
+
+    renderLines();
   </script>
 </body>
 </html>
