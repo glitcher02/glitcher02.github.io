@@ -1,0 +1,16 @@
+name = "archie-ai-drafter"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+
+# --- API key (NEVER commit it) ---
+# Set as an encrypted secret, not in this file:
+#   npx wrangler secret put OPENAI_API_KEY
+# It is stored by Cloudflare and injected as env.OPENAI_API_KEY at runtime.
+
+# --- Optional: per-IP daily rate limit (recommended for a public endpoint) ---
+# 1. Create the namespace:
+#      npx wrangler kv namespace create RL
+# 2. Paste the printed id below and uncomment:
+# [[kv_namespaces]]
+# binding = "RL"
+# id = "PASTE_THE_ID_HERE"

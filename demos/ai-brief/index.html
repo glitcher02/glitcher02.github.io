@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Proposal Drafter — Demo · Archie Butler</title>
+  <meta name="description" content="Describe a client and a trip; watch a tailored day-by-day proposal assemble itself. An interactive demo on archiebutler.co.uk." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --ink:#1f1b17;--ink-2:#4a433b;--gold:#c3a26b;--gold-d:#a5854f;--stone:#b9b0a1;
+      --pine:#16302b;--cream:#faf6ef;--cream-2:#f2ece1;--line:#e6ddce;
+      --serif:"Fraunces","Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    body{margin:0;font-family:var(--sans);color:var(--ink-2);background:var(--cream);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+    h1,h2,h3,h4{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.12;}
+    .label{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-d);}
+    .ribbon{background:var(--ink);color:var(--cream);font-size:13px;text-align:center;padding:9px 16px;}
+    .ribbon a{color:var(--gold);font-weight:600;text-decoration:none;}
+    .ribbon a:hover{text-decoration:underline;}
+    .ribbon b{color:#e7c877;}
+    header.top{max-width:1080px;margin:0 auto;padding:40px clamp(20px,5vw,48px) 8px;}
+    header.top h1{font-size:clamp(30px,5vw,44px);margin:14px 0 8px;}
+    header.top p{max-width:62ch;margin:0;}
+
+    .layout{max-width:1080px;margin:0 auto;padding:28px clamp(20px,5vw,48px) 40px;display:grid;grid-template-columns:360px 1fr;gap:36px;align-items:start;}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+
+    .form{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 24px;position:sticky;top:20px;}
+    .field{margin-bottom:18px;}
+    .field label{display:block;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;}
+    .field select,.field input{width:100%;font-family:var(--sans);font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;background:var(--cream);color:var(--ink);}
+    .field input:focus,.field select:focus{outline:none;border-color:var(--gold);}
+    .suggest{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .suggest button{font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:30px;background:var(--cream);color:var(--ink-2);cursor:pointer;}
+    .suggest button:hover{border-color:var(--gold);color:var(--gold-d);}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .chip{font-size:13px;padding:8px 14px;border:1px solid var(--line);border-radius:30px;background:var(--cream);cursor:pointer;user-select:none;transition:all .15s;}
+    .chip.on{background:var(--pine);color:var(--cream);border-color:var(--pine);}
+    .go{width:100%;margin-top:6px;border:0;background:var(--ink);color:var(--cream);font-family:var(--sans);font-weight:600;font-size:15px;padding:14px;border-radius:30px;cursor:pointer;transition:background .15s;}
+    .go:hover{background:#3a332b;}
+    .go:disabled{opacity:.5;cursor:default;}
+    .mode{margin-top:14px;font-size:11.5px;color:var(--stone);text-align:center;}
+    .mode b{color:var(--gold-d);font-weight:600;}
+
+    .out{min-height:420px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:34px clamp(22px,3vw,40px);box-shadow:0 24px 60px -40px rgba(31,27,23,.4);}
+    .out .placeholder{color:var(--stone);font-family:var(--serif);font-style:italic;font-size:19px;text-align:center;padding:80px 20px;}
+    .out .eyebrow{color:var(--gold-d);}
+    .out h2{font-size:clamp(26px,3.4vw,36px);margin:10px 0 4px;}
+    .out .sub{font-family:var(--serif);font-style:italic;font-size:18px;color:#6b5f52;margin-bottom:22px;}
+    .out .intro{font-size:16px;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+    .dayblock{display:grid;grid-template-columns:76px 1fr;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);}
+    .dayblock:last-of-type{border-bottom:0;}
+    .dayblock .dn{font-family:var(--serif);font-size:15px;color:var(--gold-d);letter-spacing:.06em;padding-top:2px;text-transform:uppercase;}
+    .dayblock h4{font-size:19px;margin-bottom:5px;}
+    .dayblock p{margin:0;font-size:15px;}
+    .cursor::after{content:"▍";color:var(--gold);animation:blink 1s steps(2) infinite;}
+    @keyframes blink{50%{opacity:0;}}
+    .err{color:#b4532f;font-size:14px;margin-top:14px;}
+    .disc{max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 60px;font-size:13px;color:var(--stone);}
+    .disc a{color:var(--gold-d);}
+    .disc b{color:var(--ink-2);}
+  </style>
+</head>
+<body>
+  <div class="ribbon">Interactive demo · sample data only · <a href="/">← back to archiebutler.co.uk</a></div>
+
+  <header class="top">
+    <span class="label">AI</span>
+    <h1>AI proposal drafter</h1>
+    <p>Describe the client and the trip in a few clicks. Watch a tailored, day-by-day proposal assemble itself in seconds — a first draft your consultants refine, rather than a blank page they start from.</p>
+  </header>
+
+  <div class="layout">
+    <form class="form" id="form" onsubmit="return false">
+      <div class="field">
+        <label for="dest">Destination</label>
+        <input id="dest" type="text" placeholder="e.g. Botswana, the Amalfi Coast…" value="Scotland — Highlands &amp; Islands" autocomplete="off" />
+        <div class="suggest" id="suggest">
+          <button type="button" data-d="Botswana safari &amp; the Okavango Delta">Botswana</button>
+          <button type="button" data-d="The Amalfi Coast, Italy">Amalfi Coast</button>
+          <button type="button" data-d="Kyoto &amp; the Japanese Alps">Japan</button>
+          <button type="button" data-d="Patagonia, Chile &amp; Argentina">Patagonia</button>
+          <button type="button" data-d="The Maldives">Maldives</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="nights">Nights</label>
+        <select id="nights"><option>4</option><option selected>6</option><option>8</option><option>10</option></select>
+      </div>
+      <div class="field">
+        <label for="party">Travelling as</label>
+        <select id="party">
+          <option value="a couple">A couple</option>
+          <option value="a family">A family</option>
+          <option value="a group of friends">A group of friends</option>
+          <option value="a solo traveller">A solo traveller</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Style &amp; interests</label>
+        <div class="chips" id="chips">
+          <span class="chip on" data-k="relaxed">Relaxed</span>
+          <span class="chip" data-k="active">Active</span>
+          <span class="chip on" data-k="food">Food &amp; wine</span>
+          <span class="chip" data-k="culture">Culture</span>
+          <span class="chip" data-k="wildlife">Wildlife</span>
+        </div>
+      </div>
+      <button class="go" id="go">✦ Draft the proposal</button>
+      <p class="mode" id="mode"></p>
+    </form>
+
+    <div class="out" id="out">
+      <div class="placeholder">Your draft proposal will appear here.</div>
+    </div>
+  </div>
+
+  <p class="disc" id="disc"></p>
+
+  <script>
+    // ── Real-AI switch ────────────────────────────────────────────────
+    // Leave empty for the built-in scripted demo. Paste your Cloudflare
+    // Worker URL (see /ai-worker/README.md) to draft with Claude for real.
+    const AI_ENDPOINT = "https://archie-ai-drafter.noteworthy-c13.workers.dev";
+    // ──────────────────────────────────────────────────────────────────
+
+    const usingAI = AI_ENDPOINT.trim().length > 0;
+    document.getElementById('mode').innerHTML = usingAI
+      ? 'Powered by <b>OpenAI</b> · type any destination'
+      : 'Scripted demo · <b>connect OpenAI</b> to draft any destination';
+    document.getElementById('disc').innerHTML = usingAI
+      ? '<b>How this works:</b> your inputs go to a small Cloudflare Worker that calls the OpenAI API server-side — the API key never touches this page. In a real build this runs on your own content, tone and product library. <a href="/#demos">See the other demos →</a>'
+      : '<b>How this demo works:</b> to stay self-contained it assembles the draft from curated building blocks, so there is no live model behind this page yet. It ships with a ready-to-deploy Cloudflare Worker that connects it to OpenAI (a cheap model under strict guidelines) — the API key stays server-side, never in this page. <a href="/#demos">See the other demos →</a>';
+
+    // suggestion chips fill the destination box
+    document.getElementById('suggest').addEventListener('click', e => {
+      const b = e.target.closest('button'); if(!b) return;
+      const dest = document.getElementById('dest');
+      dest.value = b.dataset.d.replace(/&amp;/g,'&');
+    });
+    // style chips toggle
+    document.getElementById('chips').addEventListener('click', e => {
+      if(e.target.classList.contains('chip')) e.target.classList.toggle('on');
+    });
+
+    // ── Built-in scripted content (fallback / offline) ────────────────
+    const BANKS = {
+      scotland:{ title:'A Private Journey Through Scotland', sub:'Highlands, lochs and the western isles', keys:['scotland','highland','skye','edinburgh'] },
+      kenya:{ title:'A Tailored East African Safari', sub:'From the plains to the Indian Ocean', keys:['kenya','safari','tanzania','africa','botswana','okavango'] },
+      italy:{ title:'The Southern Italian Coast', sub:'Amalfi, hidden villages and long lunches', keys:['italy','amalfi','tuscany','rome','sicily'] },
+      japan:{ title:'Japan — City to Mountain', sub:'Neon, temples and the art of detail', keys:['japan','kyoto','tokyo','alps'] },
+      generic:{ title:'A Bespoke Private Journey', sub:'Designed around you', keys:[] },
+    };
+    const BLOCKS = {
+      scotland:{ arrival:['Arrival & the glen','Met privately and driven into the hills, settling into a country house between mountain and sea.'], relaxed:['A slow day by the loch','A leisurely morning, a long lunch at a hidden inn, and afternoon tea back at the house.'], active:['Into the hills','Out with a private mountain guide across dramatic ridgelines, at a pace set by you.'], food:['Whisky & the table','A private tasting of west-coast malts followed by a tasting menu built around the day-boat catch.'], culture:['Castles & clan history','A private, before-opening visit to a storied island castle with a local historian.'], wildlife:['On the water','A private boat charter in search of white-tailed eagles, seals and otters.'], leisure:['At leisure on Skye','Time to wander island gardens and villages, or simply take in the view.'], farewell:['A farewell to remember','A final dinner at one of the island’s celebrated restaurants before the journey home.'] },
+      kenya:{ arrival:['Arrival & the first camp','Flown by light aircraft to your first camp as the plains open out below.'], relaxed:['Camp & canopy','A gentle morning in camp, a bush breakfast, and an afternoon watching the waterhole.'], active:['Walking safari','A guided walk with an armed ranger, reading tracks and the smaller wonders of the bush.'], food:['Bush dining','Sundowners on the plains and a private dinner under a sky thick with stars.'], culture:['A visit to the community','Time with a local community and the conservancy your safari supports.'], wildlife:['The great game drive','Dawn and dusk drives in search of the big cats, elephant and, in season, the migration.'], leisure:['To the coast','A flight to the ocean and a beach house of quiet luxury.'], farewell:['Ocean & farewell','A dhow at golden hour and a final seafood feast by the water.'] },
+      italy:{ arrival:['Arrival on the coast','A private transfer along the cliff road to a villa above the sea.'], relaxed:['La dolce far niente','A slow day between the pool terrace and a hidden cove reached by private boat.'], active:['The path of the gods','A guided coastal walk high above the villages, ending with lunch in a lemon grove.'], food:['Cucina & cantina','A market visit and a private cookery lesson, then a cellar dinner with a local winemaker.'], culture:['Ancient afternoons','A private, expert-led visit to ruins and frescoes before the day-trippers arrive.'], wildlife:['Along the coast by sea','A private boat along the coast to sea caves and quiet anchorages.'], leisure:['A day at leisure','Time to explore the town, or simply linger over a long lunch.'], farewell:['A last Italian table','A farewell dinner of many small courses as the lights come up along the coast.'] },
+      japan:{ arrival:['Arrival in the city','Met at the airport and driven in, with an evening walk through glowing backstreets.'], relaxed:['A gentler pace','A morning tea ceremony and an afternoon in a quiet garden away from the rush.'], active:['Cycling & backstreets','A guided cycle through neighbourhoods most visitors never find.'], food:['An evening of counters','A guided journey through tiny counter restaurants, ending at an intimate sushi bar.'], culture:['Temples & tradition','A private, early-morning visit to the old temples with a cultural guide.'], wildlife:['Mountains & macaques','A day trip to the hills to see wild macaques and mountain shrines.'], leisure:['At your pace','A free day to wander the old lanes, or take a private craft workshop.'], farewell:['A kaiseki farewell','A final multi-course kaiseki dinner, the seasons expressed on the plate.'] },
+      generic:{ arrival:['Arrival & settling in','Met privately on arrival and taken to your first retreat to settle in at leisure.'], relaxed:['A day at your own pace','An unhurried day to enjoy where you are, with nothing to be anywhere for.'], active:['An active morning','A guided outing into the landscape, tailored to your energy and interests.'], food:['A table to remember','A private tasting and a dinner built around the very best of the region.'], culture:['Culture & context','A privately guided visit to the place’s most storied sights, before the crowds.'], wildlife:['Into nature','Time in the wild with an expert guide, seeking out what the region is known for.'], leisure:['At leisure','A free day to explore independently, or simply do nothing at all.'], farewell:['A fitting farewell','A final evening to raise a glass to the journey before heading home.'] },
+    };
+
+    function pickBank(dest){
+      const d = dest.toLowerCase();
+      for(const [k,v] of Object.entries(BANKS)){
+        if(v.keys.some(key => d.includes(key))) return k;
+      }
+      return 'generic';
+    }
+    function localProposal(dest, nights, party, styles){
+      const k = pickBank(dest);
+      const bank = BLOCKS[k], meta = BANKS[k];
+      const seq = ['arrival'];
+      const mids = styles.length ? styles.slice() : ['relaxed'];
+      let i = 0;
+      while(seq.length < nights - 1){ seq.push(mids[i % mids.length]); i++; }
+      if(nights >= 6 && !seq.includes('leisure')) seq[seq.length-1] = 'leisure';
+      seq.push('farewell');
+      const styleWords = styles.length
+        ? styles.map(s=>({relaxed:'unhurried',active:'active',food:'food-led',culture:'culture-rich',wildlife:'wildlife-focused'})[s]).join(', ')
+        : 'unhurried';
+      return {
+        title: k === 'generic' ? `${dest} — A Private Journey` : meta.title,
+        subtitle: meta.sub,
+        intro: `A ${nights}-night journey designed for ${party}, with an ${styleWords} rhythm. Here is a first outline to shape together.`,
+        days: seq.slice(0, nights).map(key => ({ title: bank[key][0], body: bank[key][1] })),
+      };
+    }
+
+    async function aiProposal(payload){
+      const res = await fetch(AI_ENDPOINT, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload),
+      });
+      if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.error || ('Error '+res.status)); }
+      return res.json();
+    }
+
+    // ── Rendering (shared by both paths) ──────────────────────────────
+    async function typeInto(el, text, speed){
+      el.classList.add('cursor');
+      for(let i=0;i<text.length;i++){ el.textContent = text.slice(0,i+1); await new Promise(r=>setTimeout(r, speed)); }
+      el.classList.remove('cursor');
+    }
+    async function render(p){
+      const out = document.getElementById('out');
+      out.innerHTML = `<p class="label eyebrow">Draft proposal</p><h2 id="t"></h2><p class="sub" id="s"></p><p class="intro" id="intro"></p><div id="days"></div>`;
+      await typeInto(document.getElementById('t'), p.title, 14);
+      await typeInto(document.getElementById('s'), p.subtitle, 8);
+      if (p.intro && p.intro.trim()) await typeInto(document.getElementById('intro'), p.intro, 5);
+      else document.getElementById('intro').style.display = 'none';
+      const daysEl = document.getElementById('days');
+      for(let n=0;n<p.days.length;n++){
+        const block = document.createElement('div'); block.className = 'dayblock';
+        block.innerHTML = `<div class="dn">Day ${n+1}</div><div><h4></h4><p></p></div>`;
+        daysEl.appendChild(block);
+        block.scrollIntoView({block:'nearest'});
+        await typeInto(block.querySelector('h4'), p.days[n].title, 12);
+        await typeInto(block.querySelector('p'), p.days[n].body, 4);
+      }
+    }
+
+    const go = document.getElementById('go');
+    go.addEventListener('click', async () => {
+      const destination = document.getElementById('dest').value.trim();
+      if(!destination){ document.getElementById('dest').focus(); return; }
+      const nights = parseInt(document.getElementById('nights').value,10);
+      const party = document.getElementById('party').value;
+      const styles = [...document.querySelectorAll('.chip.on')].map(c=>c.dataset.k);
+
+      go.disabled = true; go.textContent = usingAI ? 'Drafting with AI…' : 'Drafting…';
+      try{
+        let proposal;
+        if(usingAI){
+          try { proposal = await aiProposal({ destination, nights, party, styles }); }
+          catch(err){ proposal = localProposal(destination, nights, party, styles); proposal._note = String(err.message||err); }
+        } else {
+          proposal = localProposal(destination, nights, party, styles);
+        }
+        await render(proposal);
+        if(proposal._note){
+          const e = document.createElement('p'); e.className='err';
+          e.textContent = 'Live AI unavailable ('+proposal._note+') — showing the built-in draft instead.';
+          document.getElementById('out').appendChild(e);
+        }
+      } finally {
+        go.disabled = false; go.textContent = '✦ Draft it again';
+      }
+    });
+  </script>
+</body>
+</html>

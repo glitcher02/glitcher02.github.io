@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quote &amp; Margin Builder — Demo · Archie Butler</title>
+  <meta name="description" content="An interactive quoting demo — add experiences to a trip and watch price, cost and margin update live. Sample data only." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --ink:#1f1b17;--ink-2:#4a433b;--gold:#c3a26b;--gold-d:#a5854f;--stone:#b9b0a1;
+      --pine:#16302b;--cream:#faf6ef;--cream-2:#f2ece1;--line:#e6ddce;--green:#4f7d5f;
+      --serif:"Fraunces","Cormorant Garamond",Georgia,serif;--sans:"Inter",-apple-system,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    body{margin:0;font-family:var(--sans);color:var(--ink-2);background:var(--cream);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+    h1,h2,h3,h4{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.1;}
+    .label{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-d);}
+    .ribbon{background:var(--ink);color:var(--cream);font-size:13px;text-align:center;padding:9px 16px;}
+    .ribbon a{color:var(--gold);font-weight:600;text-decoration:none;}
+    .ribbon a:hover{text-decoration:underline;}
+    header.top{max-width:1120px;margin:0 auto;padding:40px clamp(20px,5vw,48px) 8px;}
+    header.top h1{font-size:clamp(30px,5vw,44px);margin:14px 0 8px;}
+    header.top p{max-width:60ch;margin:0;}
+
+    .layout{max-width:1120px;margin:0 auto;padding:28px clamp(20px,5vw,48px) 80px;display:grid;grid-template-columns:1fr 340px;gap:36px;align-items:start;}
+    @media(max-width:880px){.layout{grid-template-columns:1fr;}}
+
+    .cat{margin-bottom:30px;}
+    .cat > .label{display:block;margin-bottom:12px;}
+    .item{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
+    .item.on{border-color:var(--gold);box-shadow:0 8px 24px -18px rgba(31,27,23,.5);}
+    .item h4{font-size:18px;margin-bottom:3px;}
+    .item p{margin:0;font-size:13.5px;color:#6b5f52;}
+    .item .price{font-family:var(--serif);font-size:17px;color:var(--ink);white-space:nowrap;}
+    .item .price small{font-family:var(--sans);font-size:11px;color:var(--stone);display:block;text-align:right;letter-spacing:.04em;}
+    .stepper{display:flex;align-items:center;gap:0;margin-top:10px;border:1px solid var(--line);border-radius:30px;overflow:hidden;width:fit-content;}
+    .stepper button{width:34px;height:32px;border:0;background:var(--cream-2);color:var(--ink);font-size:18px;cursor:pointer;line-height:1;}
+    .stepper button:hover{background:var(--gold);color:#fff;}
+    .stepper .qty{min-width:42px;text-align:center;font-weight:600;font-size:14px;}
+    .ctrls{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);margin-top:14px;padding-top:12px;}
+    .ctrls .unit{font-size:12px;color:var(--stone);}
+
+    /* summary */
+    .summary{position:sticky;top:20px;background:var(--pine);color:var(--cream);border-radius:12px;padding:28px 26px;box-shadow:0 30px 60px -30px rgba(22,48,43,.7);}
+    .summary .label{color:var(--gold);}
+    .summary h3{color:var(--cream);font-size:22px;margin:6px 0 22px;}
+    .sumrow{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid rgba(250,246,239,.12);font-size:14px;}
+    .sumrow span:first-child{color:rgba(250,246,239,.72);}
+    .sumrow .v{font-family:var(--serif);font-size:19px;}
+    .total .v{font-size:32px;color:var(--gold);}
+    .total{border-bottom:0;padding-top:16px;}
+    .pp{font-size:12px;color:rgba(250,246,239,.6);text-align:right;margin:2px 0 0;}
+    .bar{height:8px;border-radius:6px;background:rgba(250,246,239,.14);overflow:hidden;margin:6px 0 4px;}
+    .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#e0c48f);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1);}
+    .marginval{font-family:var(--serif);font-size:26px;color:#bfe0c4;}
+    .empty{opacity:.6;font-size:13px;font-style:italic;font-family:var(--serif);}
+    .note{max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,48px) 60px;font-size:13px;color:var(--stone);}
+    .note a{color:var(--gold-d);}
+  </style>
+</head>
+<body>
+  <div class="ribbon">Interactive demo · sample data only · <a href="/">← back to archiebutler.co.uk</a></div>
+
+  <header class="top">
+    <span class="label">Sales &amp; margins</span>
+    <h1>Quote &amp; margin builder</h1>
+    <p>Build a trip the way a consultant would — add and adjust experiences, and watch the client price, your cost and the margin recalculate live. This is the maths no one should be doing by hand in a spreadsheet.</p>
+  </header>
+
+  <div class="layout">
+    <div id="catalogue">
+      <!-- categories injected by JS -->
+    </div>
+
+    <aside class="summary">
+      <span class="label">Live quote</span>
+      <h3>Highlands &amp; Islands</h3>
+      <div id="empty" class="empty">Add a few experiences to see the numbers build…</div>
+      <div id="figures" style="display:none">
+        <div class="sumrow"><span>Client price</span><span class="v" id="sell">£0</span></div>
+        <div class="sumrow"><span>Your cost</span><span class="v" id="cost">£0</span></div>
+        <div class="sumrow" style="border-bottom:0;padding-bottom:2px"><span>Margin</span><span class="marginval" id="marginpct">0%</span></div>
+        <div class="bar"><i id="marginbar"></i></div>
+        <div class="sumrow total"><span>Profit</span><span class="v" id="profit">£0</span></div>
+        <p class="pp" id="perperson">for 2 guests</p>
+      </div>
+    </aside>
+  </div>
+
+  <p class="note">Prices, costs and margins are invented for the demo. In a real build this sits on your live product catalogue and supplier costs, so quotes stay accurate automatically. <a href="/#demos">See the other demos →</a></p>
+
+  <script>
+    const CATALOGUE = [
+      { cat:'Accommodation', unit:'per night', items:[
+        { id:'a1', name:'Country house on the loch', desc:'Family-run retreat, Torridon', sell:620, cost:430, qty:2 },
+        { id:'a2', name:'Island hotel, Skye', desc:'Sea-view suite, half board', sell:540, cost:380, qty:0 },
+      ]},
+      { cat:'Private guiding & transfers', unit:'per day', items:[
+        { id:'g1', name:'Dedicated driver-guide', desc:'Private vehicle throughout', sell:480, cost:300, qty:0 },
+        { id:'g2', name:'Mountain-walking guide', desc:'Qualified private guide', sell:390, cost:250, qty:0 },
+      ]},
+      { cat:'Experiences', unit:'per booking', items:[
+        { id:'e1', name:'Private boat charter', desc:'Wildlife & sea lochs, Skye', sell:950, cost:640, qty:0 },
+        { id:'e2', name:'Whisky tasting by the fire', desc:'West-coast malts, private', sell:220, cost:120, qty:0 },
+        { id:'e3', name:'Castle visit before opening', desc:'Private access', sell:180, cost:90, qty:0 },
+      ]},
+      { cat:'Dining', unit:'per cover', items:[
+        { id:'d1', name:'Tasting menu at the house', desc:'Garden & day-boat produce', sell:145, cost:85, qty:2 },
+        { id:'d2', name:"Celebrated island restaurant", desc:'Farewell dinner', sell:210, cost:130, qty:0 },
+      ]},
+    ];
+    const GUESTS = 2;
+    const fmt = n => '£' + Math.round(n).toLocaleString('en-GB');
+
+    const cat = document.getElementById('catalogue');
+    CATALOGUE.forEach(group => {
+      const sec = document.createElement('div'); sec.className = 'cat';
+      sec.innerHTML = `<span class="label">${group.cat}</span>`;
+      group.items.forEach(it => {
+        const row = document.createElement('div'); row.className = 'item' + (it.qty>0?' on':''); row.dataset.id = it.id;
+        row.innerHTML = `
+          <div>
+            <h4>${it.name}</h4>
+            <p>${it.desc}</p>
+          </div>
+          <div class="price">${fmt(it.sell)}<small>${group.unit}</small></div>
+          <div class="ctrls">
+            <span class="unit">${group.unit}</span>
+            <div class="stepper">
+              <button aria-label="less" data-d="-1">–</button>
+              <span class="qty">${it.qty}</span>
+              <button aria-label="more" data-d="1">+</button>
+            </div>
+          </div>`;
+        row.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+          it.qty = Math.max(0, it.qty + parseInt(b.dataset.d,10));
+          row.querySelector('.qty').textContent = it.qty;
+          row.classList.toggle('on', it.qty>0);
+          recalc();
+        }));
+        sec.appendChild(row);
+      });
+      cat.appendChild(sec);
+    });
+
+    function recalc(){
+      let sell=0, cost=0, any=false;
+      CATALOGUE.forEach(g => g.items.forEach(it => { if(it.qty>0) any=true; sell += it.sell*it.qty; cost += it.cost*it.qty; }));
+      document.getElementById('empty').style.display = any ? 'none':'block';
+      document.getElementById('figures').style.display = any ? 'block':'none';
+      const profit = sell - cost;
+      const margin = sell>0 ? (profit/sell*100) : 0;
+      document.getElementById('sell').textContent = fmt(sell);
+      document.getElementById('cost').textContent = fmt(cost);
+      document.getElementById('profit').textContent = fmt(profit);
+      document.getElementById('marginpct').textContent = margin.toFixed(0) + '%';
+      document.getElementById('marginbar').style.width = Math.min(100, margin) + '%';
+      document.getElementById('perperson').textContent = fmt(sell/GUESTS) + ' per guest · ' + GUESTS + ' guests';
+    }
+    recalc();
+  </script>
+</body>
+</html>
